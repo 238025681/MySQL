@@ -536,4 +536,101 @@ SELECT name,
 		 TIMESTAMPDIFF(MINUTE , p.birthdate, CURRENT_TIMESTAMP) as age_in_minutes
  		
 FROM people as p
+
+-- Exercises: Data Definition and Data Types
+
+
+-- 01
+
+SELECT COUNT(*) FROM wizzard_deposits;
+
+
+-- 02
+
+SELECT MAX(w.magic_wand_size) as longest_magic_wand FROM wizzard_deposits as w;
+
+-- 03
+
+SELECT deposit_group, MAX(w.magic_wand_size) as longest_magic_wand
+FROM wizzard_deposits as w
+GROUP BY w.deposit_group
+
+-- 04
+
+
+
+SELECT w.deposit_group, AVG(w.magic_wand_size) AS test
+FROM wizzard_deposits AS w
+GROUP BY w.deposit_group
+
+
+-- 05
+
+SELECT w.deposit_group
+FROM wizzard_deposits AS w
+GROUP BY w.deposit_group
+HAVING AVG(w.magic_wand_size) = (
+	SELECT AVG(w.magic_wand_size) AS test
+	FROM wizzard_deposits AS w
+	GROUP BY w.deposit_group
+	ORDER BY test ASC
+	LIMIT 1
+)
+
+-- 06
+
+SELECT deposit_group, SUM(w.deposit_amount) as longest_magic_wand
+FROM wizzard_deposits as w
+WHERE w.magic_wand_creator = 'Ollivander family'
+GROUP BY w.deposit_group
+
+-- 07
+SELECT deposit_group, SUM(w.deposit_amount) as total_sum
+FROM wizzard_deposits as w
+WHERE w.magic_wand_creator = 'Ollivander family'
+GROUP BY w.deposit_group
+HAVING SUM(w.deposit_amount) < 150000
+ORDER BY total_sum DESC;
+
+-- 08
+SELECT w.deposit_group, w.magic_wand_creator, MIN(w.deposit_charge) as min_deposit_charge
+FROM wizzard_deposits as w
+GROUP BY w.deposit_group, w.magic_wand_creator
+ORDER BY w.magic_wand_creator, w.deposit_group;
+
+-- 09
+SELECT 
+	CASE
+		WHEN w.age BETWEEN 0 AND 10 THEN '[0-10]'
+		WHEN w.age BETWEEN 11 AND 20 THEN '[11-20]'
+		WHEN w.age BETWEEN 21 AND 30 THEN '[21-30]'
+		WHEN w.age BETWEEN 31 AND 40 THEN '[31-40]'
+		WHEN w.age BETWEEN 41 AND 50 THEN '[41-50]'
+		WHEN w.age BETWEEN 51 AND 60 THEN '[51-60]'
+		WHEN w.age > 60 THEN '[61+]'
+	END as age_group, COUNT(w.age) as wizard_count
+FROM wizzard_deposits as w
+GROUP BY  age_group
+
+
+-- 10 
+
+SELECT LEFT(w.first_name, 1) as first_letter
+FROM wizzard_deposits as w
+WHERE w.deposit_group = 'Troll Chest'
+GROUP BY first_letter
+
+-- 11
+
+SELECT w.deposit_group, w.is_deposit_expired,AVG(w.deposit_interest) as average_interest
+FROM wizzard_deposits as w
+WHERE DATE(w.deposit_start_date) > '1985-01-01'
+GROUP BY w.deposit_group, w.is_deposit_expired
+ORDER BY w.deposit_group DESC, w.is_deposit_expired ASC
+
+-- 12
+
+SELECT SUM(res.DIFF)
+FROM(SELECT deposit_amount - (SELECT deposit_amount FROM wizzard_deposits WHERE id = g.id + 1) 
+AS DIFF FROM  wizzard_deposits g) as res
 	
